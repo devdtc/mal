@@ -5,7 +5,7 @@ SOURCES = $(SOURCES_BASE) $(SOURCES_LISP)
 #####################
 
 SRCS = $(wildcard *.hs)
-OTHER_SRCS = $(wildcard Core/*.hs)
+OTHER_SRCS = $(wildcard core/*.hs)
 BINS = $(SRCS:%.hs=%)
 
 #####################
@@ -18,7 +18,7 @@ mal: $(word $(words $(BINS)),$(BINS))
 	cp $< $@
 
 $(BINS): %: %.hs $(OTHER_SRCS)
-	ghc --make $< -o $@
+	ghc --make $< $(OTHER_SRCS) -o $@
 
 clean:
 	rm -f $(BINS) mal *.hi *.o
