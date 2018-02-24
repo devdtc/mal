@@ -18,8 +18,8 @@ type MalParser    = Parsec Text () MalValue
 
 delim :: CharParser
 delim =
-        space
-    <|> char ','
+      space
+  <|> char ','
 
 delims :: StringParser
 delims = many delim
@@ -29,57 +29,57 @@ delims1 = many1 delim
 
 malInt :: MalParser
 malInt = try $ do
-    intStr <- pos <|> neg
+  intStr <- pos <|> neg
 
-    pure $ MalInt $ read intStr
-  where
-    pos = many1 digit
-    neg = (:) <$> (char '-') <*> pos
+  pure $ MalInt $ read intStr
+ where
+  pos = many1 digit
+  neg = (:) <$> (char '-') <*> pos
 
 malSymbol :: MalParser
 malSymbol = try $ do
-    symStr <- (:) <$> leadingChar <*> many trailingChar
+  symStr <- (:) <$> leadingChar <*> many trailingChar
 
-    pure $ MalSym $ pack symStr
-  where
-    underscore = char '_'
-    specials = oneOf "-+*/"
+  pure $ MalSym $ pack symStr
+ where
+  underscore = char '_'
+  specials = oneOf "-+*/"
 
-    leadingChar = letter <|> underscore <|> specials
-    trailingChar = leadingChar <|> digit
+  leadingChar = letter <|> underscore <|> specials
+  trailingChar = leadingChar <|> digit
 
 malString :: MalParser
 malString = try $ do
-    char '"'
-    strs <- many $ fmap pure nonEscape <|> escape
-    char '"'
+  char '"'
+  strs <- many $ fmap pure nonEscape <|> escape
+  char '"'
 
-    pure $ MalStr $ pack $ concat $ strs
-  where
-    escape = do
-        e <- char '\\'
-        c <- oneOf "\\\""
-        pure [e, c]
+  pure $ MalStr $ pack $ concat $ strs
+ where
+  escape = do
+    e <- char '\\'
+    c <- oneOf "\\\""
+    pure [e, c]
 
-    nonEscape = noneOf "\\\""
+  nonEscape = noneOf "\\\""
 
 malAtom :: MalParser
 malAtom =
-        malInt
-    <|> malSymbol
-    <|> malString
+      malInt
+  <|> malSymbol
+  <|> malString
 
 malList :: MalParser
 malList = do
-    char '('
-    delims
+  char '('
+  delims
 
-    vals <- malValue `sepEndBy` delims -- sepEndBy needed if trailing delims allowed
+  vals <- malValue `sepEndBy` delims -- sepEndBy needed if trailing delims allowed
 
-    -- trailing delims handled by above
-    char ')'
+  -- trailing delims handled by above
+  char ')'
 
-    pure $ MalList vals
+  pure $ MalList vals
 
 malValue :: MalParser
 malValue = malList <|> malAtom
@@ -87,17 +87,17 @@ malValue = malList <|> malAtom
 
 readStr :: Text -> Either String MalValue
 readStr str =
-    case result of
-        Left err -> Left $ concatMap ((++"\n") . messageString) (errorMessages err)
-        Right malVal -> Right malVal
-  where
-    tokenizer :: MalParser
-    tokenizer = do
-        delims
-        val <- malValue
-        delims
+  case result of
+    Left err -> Left $ concatMap ((++"\n") . messageString) (errorMessages err)
+    Right malVal -> Right malVal
+ where
+  tokenizer :: MalParser
+  tokenizer = do
+    delims
+    val <- malValue
+    delims
 
-        pure val
+    pure val
 
-    result = parse (tokenizer <* eof) "repl" str
+  result = parse (tokenizer <* eof) "repl" str
 

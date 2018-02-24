@@ -1,14 +1,16 @@
 
 module Types (
-    MalFunc,
-    MalValue(..)
+  MalResult,
+  MalFunc,
+  MalValue(..)
 )
 where
 
 import qualified Data.Text as T
 import Data.List
 
-type MalFunc = MalValue -> MalValue
+type MalResult = Either String MalValue
+type MalFunc = [MalValue] -> MalResult
 
 data MalValue
     = MalList [MalValue]
@@ -22,5 +24,5 @@ instance Show MalValue where
     show (MalSym sym) = T.unpack sym
     show (MalInt int) = show int
     show (MalStr str) = concat ["\"", T.unpack str, "\""]
-    show (MalFunc _) = "[FUNCTION]"
+    show (MalFunc _) = "#<function>"
 

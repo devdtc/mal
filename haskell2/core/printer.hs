@@ -1,6 +1,6 @@
 
 module Printer (
-    printStr
+  printStr
 )
 where
 
