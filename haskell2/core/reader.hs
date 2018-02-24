@@ -28,7 +28,7 @@ delims1 :: StringParser
 delims1 = many1 delim
 
 malInt :: MalParser
-malInt = do
+malInt = try $ do
     intStr <- pos <|> neg
 
     pure $ MalInt $ read intStr
@@ -37,7 +37,7 @@ malInt = do
     neg = (:) <$> (char '-') <*> pos
 
 malSymbol :: MalParser
-malSymbol = do
+malSymbol = try $ do
     symStr <- (:) <$> leadingChar <*> many trailingChar
 
     pure $ MalSym $ pack symStr
@@ -49,7 +49,7 @@ malSymbol = do
     trailingChar = leadingChar <|> digit
 
 malString :: MalParser
-malString = do
+malString = try $ do
     char '"'
     strs <- many $ fmap pure nonEscape <|> escape
     char '"'
